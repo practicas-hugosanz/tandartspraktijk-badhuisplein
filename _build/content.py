@@ -78,8 +78,8 @@ T["esthetische-behandelingen"] = dict(
 
 T["bleken"] = dict(
     title="Tanden bleken Hardenberg | Veilig bij de tandarts",
-    desc="Tanden bleken in Hardenberg? Bij Tandartspraktijk Badhuisplein kijkt de tandarts eerst of het kan en wat bij u past. Lees hoe het werkt en wat u kunt verwachten.",
-    h1='Tanden <em class="g">bleken</em> bij de tandarts',
+    desc="Tanden bleken in Hardenberg? Bij Tandartspraktijk Badhuisplein kijkt de tandarts eerst of het kan en wat bij u past. Lees wat u kunt verwachten.",
+    h1='Tanden <em class="g">bleken</em> in Hardenberg',
     lead="Tanden worden met de jaren donkerder. Bleken kan ze enkele tinten lichter maken, maar het kan niet altijd. Daarom bespreekt u uw wensen eerst met de tandarts.",
     img="bleken.webp", img_alt="Assistente van de praktijk in gesprek met een jonge patiënte in de behandelstoel", img_pos="62% 40%",
     procedure="Tanden bleken",
@@ -145,7 +145,7 @@ T["implantaten"] = dict(
 T["kronen-en-bruggen"] = dict(
     title="Kronen en bruggen Hardenberg | Vaak dezelfde dag geplaatst",
     desc="Kroon nodig in Hardenberg? Na een digitale scan plaatsen we een normale kroon meestal dezelfde dag. Soms maakt ons eigen lab hem in circa twee weken.",
-    h1='Een kroon, vaak op <em class="g">dezelfde dag</em>',
+    h1='Kronen en bruggen in Hardenberg, vaak op <em class="g">dezelfde dag</em>',
     lead="Kronen en bruggen herstellen de vorm en functie van uw tanden en kiezen. Na het voorbereiden en een scan kan een normale kroon in de meeste gevallen aan het eind van de middag al worden geplaatst.",
     img="cadcam.webp", img_alt="Medewerker van de praktijk bij de machine die kronen op maat maakt", img_pos="62% 50%",
     procedure="Kroon- en brugwerk",
@@ -180,8 +180,8 @@ T["kronen-en-bruggen"] = dict(
 
 T["protheses"] = dict(
     title="Kunstgebit en klikgebit Hardenberg | Tandprotheticus",
-    desc="Kunstgebit, frame of plaatje in Hardenberg? Onze tandprotheticus en tandtechnieker werken in hetzelfde pand. Reparaties doorgaans aan het eind van de dag klaar.",
-    h1='Kunstgebit, frame of <em class="g">klikgebit</em>',
+    desc="Kunstgebit, frame of plaatje in Hardenberg? Onze tandprotheticus en tandtechnieker zitten in hetzelfde pand. Reparaties meestal dezelfde dag klaar.",
+    h1='Kunstgebit en klikgebit in <em class="g">Hardenberg</em>',
     lead="Heeft u geen of bijna geen eigen tanden meer, dan kan een prothese uitkomst bieden. Tandartsen, implantoloog en tandprothetici werken nauw samen, en reparaties gebeuren in ons eigen laboratorium.",
     img="serge-behandeling.webp", img_alt="Tandprotheticus Serge bij een patiënte in de behandelkamer", img_pos="40% 40%",
     procedure="Gebitsprothese",
@@ -217,7 +217,7 @@ T["protheses"] = dict(
 T["othodontie-en-invisalign"] = dict(
     title="Invisalign en beugel Hardenberg | Gratis intake orthodontie",
     desc="Rechte tanden in Hardenberg met Invisalign, Spark of brackets. Tijdens een gratis intake bij Tandartspraktijk Badhuisplein hoort u welke beugel bij u past.",
-    h1='Orthodontie en <em class="g">Invisalign</em>',
+    h1='Orthodontie en Invisalign in <em class="g">Hardenberg</em>',
     lead="Rechte tanden zijn mooi, en ook beter voor bijten, kauwen en poetsen. We werken met onzichtbare aligners van Invisalign en Spark en met brackets. Tijdens een gratis intake kijken we wat bij u past.",
     img="scan.webp", img_alt="Assistente maakt een digitale scan van het gebit van een patiënte", img_pos="45% 40%",
     procedure="Orthodontische behandeling",
@@ -250,8 +250,8 @@ T["othodontie-en-invisalign"] = dict(
 
 T["vullingen"] = dict(
     title="Witte vullingen Hardenberg | Altijd composiet",
-    desc="Gaatje laten vullen in Hardenberg? Bij Tandartspraktijk Badhuisplein vullen we altijd met wit composiet dat direct hard is. U kiest zelf of u verdoving wilt.",
-    h1='Witte <em class="g">vullingen</em>',
+    desc="Gaatje laten vullen in Hardenberg? Bij Badhuisplein vullen we altijd met wit composiet dat direct hard is. U kiest zelf of u verdoving wilt.",
+    h1='Witte vullingen in <em class="g">Hardenberg</em>',
     lead="Komt u voor een gaatje, dan kiest u zelf of u verdoving wilt. Vullingen maken we bij ons altijd van composiet: wit vulmateriaal dat onder een blauwe lamp direct hard wordt.",
     img="behandeling-kinan.webp", img_alt="Tandarts Kinan Khalil behandelt samen met een assistente een patiënte", img_pos="62% 40%",
     procedure="Tandvulling",
@@ -277,8 +277,8 @@ T["vullingen"] = dict(
 
 T["extractie-trekken"] = dict(
     title="Tand of kies trekken in Hardenberg | Extractie en nazorg",
-    desc="Moet er een tand of kies getrokken worden? Lees hoe een extractie bij Tandartspraktijk Badhuisplein in Hardenberg verloopt en wat u na afloop wel en niet mag.",
-    h1='Een tand of kies <em class="g">trekken</em>',
+    desc="Moet er een tand of kies getrokken worden? Lees hoe een extractie bij Badhuisplein in Hardenberg verloopt en wat u na afloop wel en niet mag.",
+    h1='Tand of kies trekken in <em class="g">Hardenberg</em>',
     lead="Soms is een tand of kies niet meer te redden. Een extractie gebeurt onder verdoving. Hier leest u hoe u zich voorbereidt, wat er gebeurt en wat u daarna het beste kunt doen.",
     img="extractie.webp", img_alt="Tandarts Alvaro Soler en een assistente behandelen een patiënte", img_pos="62% 40%",
     procedure="Tandextractie",
@@ -315,8 +315,8 @@ T["extractie-trekken"] = dict(
 
 T["wortelkanaalbehandeling"] = dict(
     title="Wortelkanaalbehandeling Hardenberg | Eigen tand behouden",
-    desc="Ontstoken zenuw of hevige kiespijn? Met een wortelkanaalbehandeling bij Tandartspraktijk Badhuisplein in Hardenberg stoppen we de ontsteking en behoudt u uw tand.",
-    h1='Wortelkanaalbehandeling: uw eigen tand <em class="g">behouden</em>',
+    desc="Ontstoken zenuw of hevige kiespijn? Met een wortelkanaalbehandeling bij Badhuisplein in Hardenberg stoppen we de ontsteking en behoudt u uw tand.",
+    h1='Wortelkanaalbehandeling in <em class="g">Hardenberg</em>',
     lead="Een ernstig ontstoken zenuw kan hevige pijn geven. Met een wortelkanaalbehandeling nemen we de oorzaak weg, zodat de ontsteking stopt en u uw tand of kies kunt behouden.",
     img="wortelkanaal.webp", img_alt="Tandarts en assistente aan het werk bij een patiënte in de stoel", img_pos="62% 40%",
     procedure="Wortelkanaalbehandeling",
@@ -347,8 +347,8 @@ T["wortelkanaalbehandeling"] = dict(
 
 T["preventie-en-mondhygiene"] = dict(
     title="Mondhygiëne en preventie Hardenberg | Gebitsreiniging",
-    desc="Bloedend tandvlees, tandsteen of een slechte adem? Het preventieteam van Tandartspraktijk Badhuisplein in Hardenberg reinigt uw gebit en geeft persoonlijk advies.",
-    h1='Preventie en <em class="g">mondhygiëne</em>',
+    desc="Bloedend tandvlees, tandsteen of slechte adem? Het preventieteam van Badhuisplein in Hardenberg helpt u met gebitsreiniging en persoonlijk advies.",
+    h1='Mondhygiëne en preventie in <em class="g">Hardenberg</em>',
     lead="Preventie neemt bij ons een centrale plaats in. Ons team van preventie- en paro-preventieassistentes helpt u met gebitsreiniging en persoonlijk advies, zodat bloedend tandvlees tot het verleden behoort.",
     img="behandeling-anja.webp", img_alt="Preventieassistente Anja laat een patiënte het resultaat zien in een spiegel", img_pos="58% 35%",
     procedure="Gebitsreiniging en mondhygiëne",

@@ -52,6 +52,7 @@ Image.open(SRC / "logo-lieve-tandarts-768x224-2.png").convert("RGBA").resize((38
 balie = Image.open(SRC / "Balie-099.jpg").convert("RGB")
 balie = ImageOps.fit(balie, (1600, 900), Image.LANCZOS, centering=(0.5, 0.5))
 balie.save(IMG / "hero-poster.webp", "WEBP", quality=74, method=6)
+balie.resize((800, 450), Image.LANCZOS).save(IMG / "hero-poster-800.webp", "WEBP", quality=72, method=6)
 
 # Behandeliconen: witte lijniconen -> alfamasker (kleur via CSS mask)
 (IMG / "icons").mkdir(parents=True, exist_ok=True)

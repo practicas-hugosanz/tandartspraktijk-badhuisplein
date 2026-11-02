@@ -19,7 +19,8 @@ from content import TEAM, TREATMENTS, T  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 BASE = "https://praktijkbadhuisplein.nl/"
-TODAY = date.today().isoformat()
+# Laatste inhoudelijke wijziging. Pas aan als teksten echt veranderen; een datum die bij elke build verspringt, gelooft Google niet.
+TODAY = "2026-11-02"
 NAME = "Tandartspraktijk Badhuisplein"
 TEL = "0523-216967"
 TEL_HREF = "tel:+31523216967"
@@ -131,6 +132,10 @@ SPRITE = """<svg width="0" height="0" style="position:absolute" aria-hidden="tru
 
 # ---------------------------------------------------------------- schema
 
+EXTRA_SERVICES = [("Spark-aligners", "invisalign/"), ("Brackets (vaste beugel)", "bracket-slotjesbeugel/"), ("Behandeling onder lachgas", "behandeling-onder-lachgas/"),
+                  ("Behandeling onder narcose", "narcose/"), ("CBCT-scan", "cbct-rontgen/")]
+
+
 def dentist_schema(full=True):
     d = {
         "@type": "Dentist",
@@ -162,10 +167,13 @@ def dentist_schema(full=True):
         "currenciesAccepted": "EUR",
         "paymentAccepted": "Pin, factuur via Infomedics",
         "sameAs": [INSTA, FACEBOOK, MAPS],
-        "availableService": [
-            {"@type": "MedicalProcedure", "name": T[s]["procedure"], "url": BASE + "behandelingen/" + s + "/"}
-            for s, *_ in TREATMENTS
-        ],
+        "priceRange": "Tarieven volgens de NZa",
+        "award": "Keurmerk De Lieve Tandarts (sinds 2018)",
+        "potentialAction": {"@type": "ReserveAction", "name": "Afspraak maken", "target": {"@type": "EntryPoint", "urlTemplate": AGENDA}},
+        "hasOfferCatalog": {"@type": "OfferCatalog", "name": "Behandelingen", "itemListElement": [
+            {"@type": "Offer", "itemOffered": {"@type": "Service", "name": n, "url": BASE + u}}
+            for n, u in [(T[s]["procedure"], "behandelingen/" + s + "/") for s, *_ in TREATMENTS] + EXTRA_SERVICES
+        ]},
     })
     return d
 
@@ -191,7 +199,10 @@ def head(p):
     if DEMO:
         robots = "noindex,nofollow"
     preload = ""
-    if p.get("preload"):
+    if p.get("preload") == "assets/img/hero-poster.webp":
+        preload = (f'<link rel="preload" as="image" href="{rel(cur, p["preload"])}" fetchpriority="high" '
+                   f'imagesrcset="{rel(cur, "assets/img/hero-poster-800.webp")} 800w, {rel(cur, p["preload"])} 1600w" imagesizes="100vw">\n')
+    elif p.get("preload"):
         preload = f'<link rel="preload" as="image" href="{rel(cur, p["preload"])}" fetchpriority="high">\n'
     return f"""<!DOCTYPE html>
 <html lang="nl">
@@ -308,6 +319,7 @@ def header(p):
 def footer(p):
     cur = p["path"]
     beh = "".join(f'<li><a href="{rel(cur, "behandelingen/" + s + "/")}">{n}</a></li>' for s, n, *_ in TREATMENTS)
+    beh += f'<li><a href="{rel(cur, "invisalign/")}">Spark-beugel</a></li><li><a href="{rel(cur, "bracket-slotjesbeugel/")}">Brackets</a></li>'
     prak = "".join(f'<li><a href="{rel(cur, pth)}">{n}</a></li>' for pth, n in ZORG + PRAKTIJK + INFO[:4])
     return f"""<footer class="footer dark">
   <div class="wrap">
@@ -503,7 +515,7 @@ def who_html(cur, keys, label="Uw behandelaar"):
     for k in keys:
         n, role, _ = TEAM[k]
         out.append(f'<div class="who"><img src="{rel(cur, "assets/img/team/" + k + ".webp")}" alt="{escape(n)}" width="84" height="84" loading="lazy" decoding="async">'
-                   f'<div><small>{label}</small><b>{n}</b><span>{role}</span></div></div>')
+                   f'<div><small>{label}</small><b><a href="{rel(cur, "homepage/ons-team/")}#team-{k}">{n}</a></b><span>{role}</span></div></div>')
     return '<div class="who-row">' + "".join(out) + "</div>"
 
 
@@ -632,7 +644,7 @@ def hero_media(cur):
         sources += f'<source src="{rel(cur, "assets/video/hero.mp4")}" type="video/mp4">'
     poster = rel(cur, "assets/img/hero-poster.webp")
     if not sources:
-        return (f'<div class="hx__media" aria-hidden="true"><img src="{poster}" alt="" width="1600" height="900" '
+        return (f'<div class="hx__media" aria-hidden="true"><img src="{poster}" srcset="{rel(cur, "assets/img/hero-poster-800.webp")} 800w, {poster} 1600w" sizes="100vw" alt="" width="1600" height="900" '
                 f'fetchpriority="high" decoding="async"></div>')
     return (f'<div class="hx__media" aria-hidden="true"><video class="hx__video" autoplay muted loop playsinline '
             f'preload="metadata" poster="{poster}" data-hero-video>{sources}</video></div>'
@@ -641,13 +653,25 @@ def hero_media(cur):
             f'<span>Video pauzeren</span></button>')
 
 
+HOME_FAQ = [
+    ("Neemt Tandartspraktijk Badhuisplein nieuwe patiënten aan?", 'Ja, wij nemen weer nieuwe patiënten aan. <a href="{u:inschrijven-als-nieuwe-patient/}">Schrijf u online in</a>, dan nodigen we u uit voor een eerste consult. Bent u patiënt bij een andere tandarts, dan kunt u zich ook <a href="{u:overschrijven/}">laten overschrijven</a>.'),
+    ("Hoe maak ik een afspraak bij de tandarts in Hardenberg?", 'Plan direct in onze <a href="{u:afspraak-maken/}">online agenda</a> of bel 0523-216967. Verplaatsen of afzeggen kan alleen telefonisch, minstens 48 uur van tevoren.'),
+    ("Wat zijn de openingstijden?", "Maandag tot en met donderdag van 08:00 tot 12:00 en van 13:00 tot 16:30 uur. Vrijdag van 08:30 tot 12:30 en van 13:00 tot 16:30 uur."),
+    ("Wat moet ik doen bij kiespijn of spoed?", 'Bel tijdens openingstijden 0523-216967, indien mogelijk tussen 08:30 en 10:00 uur. Buiten openingstijden kunt u terecht bij de <a href="{u:homepage/spoedgevallen-en-weekenddienst/}">Tandartsspoedpraktijk in Zwolle</a>, telefoon 0900-8602.'),
+    ("Ik ben bang voor de tandarts. Kunt u mij helpen?", 'Ja. Sinds 2018 hebben we het keurmerk <a href="{u:de-lieve-tandarts/}">De Lieve Tandarts</a>. We plannen zo nodig extra tijd in en leggen uit wat we doen. Een behandeling kan ook <a href="{u:behandeling-onder-lachgas/}">onder lachgas</a> of <a href="{u:narcose/}">onder narcose</a>.'),
+    ("Waar zit de praktijk?", 'Aan het Badhuisplein 2 en 6 in Hardenberg. Ook als u in de omgeving woont, bijvoorbeeld in Gramsbergen, Bergentheim, Slagharen, Dedemsvaart of Ommen, bent u van harte welkom. <a href="{u:contact/}">Bekijk de route</a>.'),
+]
+
+
 def home():
     cur = ""
     p = dict(path=cur, title="Tandarts Hardenberg | Tandartspraktijk Badhuisplein",
              desc="Tandarts in Hardenberg met het keurmerk De Lieve Tandarts: controle, implantaten, Invisalign, kronen op één dag en lachgas. Nieuwe patiënten welkom.",
              preload="assets/img/hero-poster.webp")
     p["schema"] = ld(dentist_schema(), {"@type": "WebSite", "@id": BASE + "#website", "url": BASE, "name": NAME, "inLanguage": "nl-NL", "publisher": {"@id": BASE + "#praktijk"}},
-                     {"@type": "WebPage", "@id": BASE + "#webpage", "url": BASE, "name": p["title"], "isPartOf": {"@id": BASE + "#website"}, "about": {"@id": BASE + "#praktijk"}, "inLanguage": "nl-NL", "dateModified": TODAY})
+                     {"@type": "WebPage", "@id": BASE + "#webpage", "url": BASE, "name": p["title"], "isPartOf": {"@id": BASE + "#website"}, "about": {"@id": BASE + "#praktijk"}, "inLanguage": "nl-NL", "dateModified": TODAY},
+                     {"@type": "FAQPage", "@id": BASE + "#home-faq", "mainEntity": [
+                         {"@type": "Question", "name": q, "acceptedAnswer": {"@type": "Answer", "text": re.sub(r"<[^>]+>", "", a)}} for q, a in HOME_FAQ]})
     index = "".join(
         f'<li><a href="{{u:behandelingen/{s}/}}"><span class="hx__name">{n.replace("Wortelkanaalbehandeling", "Wortelkanaal&shy;behandeling")}</span>{icon("arrow", "hx__arr")}</a></li>'
         for s, n, d, ic in TREATMENTS)
@@ -663,7 +687,7 @@ def home():
   {hero_media(cur)}
   <div class="wrap">
     <div class="hx__head">
-      <h1 id="hero-h">Op uw gemak bij de<br>tandarts in <em class="sig">Hardenberg.</em></h1>
+      <h1 id="hero-h">Op uw gemak bij de <br>tandarts in <em class="sig">Hardenberg.</em></h1>
       <div class="hx__side">
         <p class="lead">Een klantgerichte praktijk met het keurmerk De Lieve Tandarts. Nieuwe patiënten zijn welkom.</p>
         <div class="btn-row">
@@ -749,6 +773,15 @@ def home():
   </div>
 </section>
 
+<section class="section section--paper on-light" aria-labelledby="vragen-h">
+  <div class="wrap">
+    <div class="faq faq--home rv">
+      <h2 id="vragen-h">Veelgestelde vragen over onze praktijk in Hardenberg</h2>
+      {"".join(f"<details><summary>{q}</summary><div><p>{a}</p></div></details>" for q, a in HOME_FAQ)}
+    </div>
+  </div>
+</section>
+
 <section class="cl dark" aria-labelledby="contact-h">
   <div class="wrap cl__grid">
     <div class="cl__info">
@@ -788,7 +821,7 @@ def treatment_pages():
                  crumbs=crumbs, section="beh", preload="assets/img/" + t["img"] if t.get("img") else None, ogtype="article")
         p["schema"] = ld(
             {"@type": "MedicalWebPage", "@id": url + "#webpage", "url": url, "name": t["title"], "description": t["desc"], "inLanguage": "nl-NL",
-             "dateModified": TODAY, "lastReviewed": TODAY,
+             "dateModified": TODAY,
              "about": {"@type": "MedicalProcedure", "name": t["procedure"]},
              "publisher": {"@id": BASE + "#praktijk"}, "breadcrumb": {"@id": url + "#breadcrumb"}},
             dict(breadcrumb_schema(crumbs), **{"@id": url + "#breadcrumb"}),
@@ -833,7 +866,7 @@ def behandelingen_index():
         for s, n, d, ic in TREATMENTS)
     main = page_hero(p) + f"""
 <section class="section on-light"><div class="wrap"><ul class="tlist">{tlist}</ul>
-<div class="note" style="margin-top:48px;max-width:760px"><p><b>Spannend?</b> Veel behandelingen kunnen ook <a href="{{u:behandeling-onder-lachgas/}}">onder lachgas</a> of <a href="{{u:narcose/}}">narcose</a>. Vraag er gerust naar.</p><p><b>Tarieven.</b> Voor alle behandelingen gelden de tarieven die jaarlijks door de Nederlandse Zorgautoriteit (NZa) worden vastgesteld. U kunt vooraf een begroting krijgen. Lees meer over <a href="{{u:homepage/tarieven-en-betaling/}}">tarieven en betaling</a> en <a href="{{u:homepage/betalen-en-vergoedingen/}}">vergoedingen</a>.</p></div>
+<div class="note" style="margin-top:48px;max-width:760px"><p><b>Op zoek naar een beugel?</b> Lees ook over de <a href="{{u:invisalign/}}">onzichtbare Spark-beugel</a> en over <a href="{{u:bracket-slotjesbeugel/}}">brackets</a>.</p><p><b>Spannend?</b> Veel behandelingen kunnen ook <a href="{{u:behandeling-onder-lachgas/}}">onder lachgas</a> of <a href="{{u:narcose/}}">narcose</a>. Vraag er gerust naar.</p><p><b>Tarieven.</b> Voor alle behandelingen gelden de tarieven die jaarlijks door de Nederlandse Zorgautoriteit (NZa) worden vastgesteld. U kunt vooraf een begroting krijgen. Lees meer over <a href="{{u:homepage/tarieven-en-betaling/}}">tarieven en betaling</a> en <a href="{{u:homepage/betalen-en-vergoedingen/}}">vergoedingen</a>.</p></div>
 </div></section>""" + cta_band(cur)
     write(p, main)
 
@@ -852,10 +885,14 @@ def team_page():
     html = ""
     for g, label in groups:
         figs = "".join(
-            f'<figure class="person rv"><img src="{{a:assets/img/team/{k}.webp}}" alt="{escape(n)}, {escape(r.lower())}" width="480" height="720" loading="lazy" decoding="async"><figcaption><b>{n}</b><span>{r}</span></figcaption></figure>'
+            f'<figure class="person rv" id="team-{k}"><img src="{{a:assets/img/team/{k}.webp}}" alt="{escape(n)}, {escape(r.lower())}" width="480" height="720" loading="lazy" decoding="async"><figcaption><b>{n}</b><span>{r}</span></figcaption></figure>'
             for k, (n, r, gg) in TEAM.items() if gg == g)
         html += f'<div class="team-group"><h2>{label}</h2><div class="team-grid">{figs}</div></div>'
-    main = page_hero(p) + f"""<section class="section on-light"><div class="wrap">{html}
+    main = page_hero(p) + f"""<section class="section on-light"><div class="wrap">
+<div class="team-intro"><h2>Wie werkt er bij Tandartspraktijk Badhuisplein?</h2>
+<p>In onze praktijk in Hardenberg werken vier tandartsen, met aandachtsgebieden als implantologie, orthodontie en esthetiek. Ons preventieteam van preventie- en paro-preventieassistentes helpt u met gebitsreiniging en persoonlijk advies. Voor protheses en tandtechnisch werk werken we samen met een tandprotheticus en een tandtechnieker in ons eigen laboratorium. Aan de balie staan onze baliemedewerksters en praktijkmanager Lucette voor u klaar.</p>
+<p>Sinds 2018 hebben we het keurmerk <a href="{{u:de-lieve-tandarts/}}">De Lieve Tandarts</a>: een team dat altijd rekening houdt met kinderen en met mensen die het spannend vinden om naar de tandarts te gaan.</p></div>
+{html}
 <div class="note" style="margin-top:56px;max-width:760px"><p><b>Werken bij Badhuisplein?</b> Bekijk de <a href="{{u:vacatures/}}">vacatures</a>.</p></div>
 </div></section>""" + cta_band(cur)
     write(p, main)
@@ -892,7 +929,7 @@ def other_pages():
     # Over de praktijk
     text_page("homepage/praktijkinformatie/", [("", "Home"), ("homepage/praktijkinformatie/", "Over de praktijk")], "praktijk",
               "Over de praktijk | Tandartspraktijk Badhuisplein Hardenberg",
-              "Tandartspraktijk Badhuisplein in Hardenberg: algemene tandheelkunde, esthetiek, orthodontie en implantologie, met keurmerk De Lieve Tandarts, CBCT en eigen lab.",
+              "Tandartspraktijk Badhuisplein in Hardenberg: tandheelkunde, esthetiek, orthodontie en implantologie, met keurmerk De Lieve Tandarts, CBCT en eigen lab.",
               'Welkom bij Tandartspraktijk <em class="g">Badhuisplein</em>',
               "Een klantgerichte praktijk in Hardenberg voor alle voorkomende tandheelkundige behandelingen, esthetische tandheelkunde, orthodontie en implantologie.",
               f"""
@@ -919,8 +956,8 @@ def other_pages():
     # De Lieve Tandarts
     text_page("de-lieve-tandarts/", [("", "Home"), ("homepage/praktijkinformatie/", "Praktijk"), ("de-lieve-tandarts/", "De Lieve Tandarts")], "zorg",
               "De Lieve Tandarts in Hardenberg | Keurmerk | Badhuisplein",
-              "Tandartspraktijk Badhuisplein in Hardenberg heeft sinds 2018 het keurmerk De Lieve Tandarts, als eerste praktijk in Overijssel. Extra aandacht bij tandartsangst.",
-              'Keurmerk <em class="g">De Lieve Tandarts</em>',
+              "Tandartspraktijk Badhuisplein in Hardenberg heeft sinds 2018 het keurmerk De Lieve Tandarts, als eerste in Overijssel. Extra aandacht bij tandartsangst.",
+              'De Lieve Tandarts in <em class="g">Hardenberg</em>',
               "Bent u bang om naar de tandarts te gaan en is de drempel daarom hoog? Dat begrijpen we. Sinds 2018 hebben we als eerste praktijk in Overijssel het keurmerk De Lieve Tandarts, en daar zijn we trots op.",
               f"""
 <figure class="lt-logo"><img src="{{a:assets/img/lieve-tandarts.png}}" alt="Logo van het keurmerk De Lieve Tandarts" width="384" height="112" loading="lazy" decoding="async"></figure>
@@ -942,8 +979,8 @@ def other_pages():
     # Lachgas
     text_page("behandeling-onder-lachgas/", [("", "Home"), ("de-lieve-tandarts/", "Extra aandacht"), ("behandeling-onder-lachgas/", "Lachgas")], "zorg",
               "Tandarts met lachgas in Hardenberg | Badhuisplein",
-              "Behandeling onder lachgas in Hardenberg: een veilige manier om angst en spanning bij de tandarts te verminderen. Snel effect en geen nawerking na de behandeling.",
-              'Behandeling onder <em class="g">lachgas</em>',
+              "Behandeling onder lachgas in Hardenberg: een veilige manier om angst en spanning bij de tandarts te verminderen. Werkt snel en heeft geen nawerking.",
+              'Behandeling onder lachgas in <em class="g">Hardenberg</em>',
               "Lachgas, ook bekend als inhalatiesedatie, is een veilige en effectieve manier om angst en spanning tijdens een tandheelkundige ingreep te verminderen.",
               """
 <h2>Hoe werkt lachgas?</h2>
@@ -953,7 +990,9 @@ def other_pages():
 <p>Voorafgaand aan de behandeling bespreken we uw medische geschiedenis en beoordelen we of lachgas bij u past. Tandartsen en assistentes letten de hele behandeling op uw veiligheid en comfort.</p>
 <div class="note"><p><b>Is lachgas niet genoeg?</b> Bij ernstige tandartsangst kan een behandeling <a href="{u:narcose/}">onder narcose</a> uitkomst bieden.</p></div>
 """, img="lachgas.webp", img_alt="Een patiënte krijgt lachgas via een neusmasker tijdens de behandeling", img_pos="50% 40%", nav=ZORG_NAV, medical="Inhalatiesedatie met lachgas",
-              faq=[("Ben ik onder lachgas nog wakker?", "Ja. Lachgas maakt u ontspannen en kalm, maar u slaapt niet. Wilt u volledig slapen tijdens de behandeling, dan is narcose een andere mogelijkheid."),
+              faq=[("Kan mijn kind ook lachgas krijgen?", "Dat kan. Op een rustige manier laten we uw kind eerst wennen aan het neusmasker. Vooraf beoordelen we of lachgas geschikt is."),
+                   ("Mag ik lachgas als ik zwanger ben?", "Vertel het ons altijd als u zwanger bent of denkt te zijn. Dan bespreken we vooraf of lachgas voor u geschikt is."),
+                   ("Ben ik onder lachgas nog wakker?", "Ja. Lachgas maakt u ontspannen en kalm, maar u slaapt niet. Wilt u volledig slapen tijdens de behandeling, dan is narcose een andere mogelijkheid."),
                    ("Merk ik na de behandeling nog iets van lachgas?", "Lachgas heeft na de behandeling geen nawerking. U kunt direct daarna weer normaal functioneren."),
                    ("Kan iedereen lachgas krijgen?", "Dat beoordelen we vooraf, aan de hand van uw medische geschiedenis.")])
 
@@ -961,9 +1000,11 @@ def other_pages():
     text_page("narcose/", [("", "Home"), ("de-lieve-tandarts/", "Extra aandacht"), ("narcose/", "Narcose")], "zorg",
               "Tandarts onder narcose in Hardenberg | Badhuisplein",
               "Ernstige tandartsangst? Bij Tandartspraktijk Badhuisplein in Hardenberg kunt u onder narcose worden behandeld, met tandartsen en anesthesiologen naast u.",
-              'Behandeling onder <em class="g">narcose</em>',
+              'Behandeling onder narcose in <em class="g">Hardenberg</em>',
               "Bij een narcosebehandeling wordt u in een diepe slaap gebracht, waardoor u volledig ontspant en niets van de behandeling merkt. Dat is ideaal voor mensen met ernstige tandartsangst.",
               f"""
+<h2>Voor wie is narcose bedoeld?</h2>
+<p>Een behandeling onder narcose is vooral bedoeld voor mensen met ernstige tandartsangst, voor wie een bezoek aan de tandarts anders niet of nauwelijks mogelijk is. Is uw angst minder groot, dan kan een <a href="{{u:behandeling-onder-lachgas/}}">behandeling onder lachgas</a> al genoeg zijn. We bespreken samen wat bij u past.</p>
 <h2>Veilig en begeleid</h2>
 <p>Ons ervaren team van tandartsen en anesthesiologen zorgt de hele behandeling voor uw veiligheid en comfort. Voorafgaand wordt uw gezondheid grondig beoordeeld, zodat we zeker weten dat narcose voor u veilig is.</p>
 <h2>Na de behandeling</h2>
@@ -971,7 +1012,8 @@ def other_pages():
 <div class="note"><p><b>Meer weten?</b> Neem gerust contact met ons op via <a href="{TEL_HREF}">{TEL}</a>. We beantwoorden al uw vragen en plannen een afspraak die bij u past.</p></div>
 <div class="note"><p><b>Bent u behandelaar?</b> <a href="{{u:doorverwijzing-narcose-voor-behandelaars/}}">Verwijs een patiënt door voor narcose</a>.</p></div>
 """, nav=ZORG_NAV, medical="Tandheelkundige behandeling onder narcose",
-              faq=[("Merk ik iets van de behandeling?", "Nee. U wordt in een diepe slaap gebracht en merkt niets van de behandeling. Achteraf heeft u er weinig tot geen herinnering aan."),
+              faq=[("Wat moet ik vooraf regelen?", "Dat bespreken we met u in het gesprek voorafgaand aan de behandeling, zodat u precies weet wat u moet doen en hoe u weer veilig thuiskomt."),
+                   ("Merk ik iets van de behandeling?", "Nee. U wordt in een diepe slaap gebracht en merkt niets van de behandeling. Achteraf heeft u er weinig tot geen herinnering aan."),
                    ("Is narcose veilig?", "Voorafgaand wordt uw gezondheid grondig beoordeeld. Tandartsen en anesthesiologen zorgen tijdens de hele procedure voor uw veiligheid en comfort.")])
 
     # Patiënten met een beperking
@@ -991,7 +1033,7 @@ def other_pages():
     text_page("homepage/spoedgevallen-en-weekenddienst/", [("", "Home"), ("homepage/spoedgevallen-en-weekenddienst/", "Spoed en weekenddienst")], "info",
               "Spoed tandarts Hardenberg | Avond en weekend | Badhuisplein",
               "Kiespijn of een spoedgeval? Bel Tandartspraktijk Badhuisplein op 0523-216967. Buiten openingstijden kunt u terecht bij de Tandartsspoedpraktijk in Zwolle.",
-              'Pijn of een <em class="g">spoedgeval?</em>',
+              'Spoed bij de tandarts in <em class="g">Hardenberg</em>',
               "Wacht bij pijnklachten niet tot uw volgende controle, maar neem contact met ons op. Dan proberen we u dezelfde dag nog te helpen.",
               f"""
 <h2>Tijdens openingstijden</h2>
@@ -1009,12 +1051,23 @@ def other_pages():
   <li>De factuur kunt u zelf indienen bij uw zorgverzekeraar.</li>
   <li>Vergeet uw zorgpas en identiteitsbewijs niet.</li>
 </ul>
-""", nav=INFO_NAV)
+<h2>Wanneer is het spoed?</h2>
+<ul>
+  <li>hevige kiespijn die niet overgaat met een gewone pijnstiller;</li>
+  <li>een dikke wang of zwelling, eventueel met koorts;</li>
+  <li>een nabloeding na het trekken van een tand of kies;</li>
+  <li>een ongeluk waarbij een tand is afgebroken of uit de mond is geslagen.</li>
+</ul>
+<p>Is er een tand uit de mond geslagen? Pak hem vast aan de kroon, niet aan de wortel. Bewaar hem in melk of in uw mond tegen de wang en bel direct.</p>
+""", nav=INFO_NAV,
+              faq=[("Waar kan ik in het weekend terecht met kiespijn?", "Buiten werktijden en op feestdagen kunt u terecht bij de Tandartsspoedpraktijk, Dokter van Heesweg 2 in Zwolle, telefoon 0900-8602."),
+                   ("Wat kost een bezoek aan de spoeddienst?", "Een bezoek aan de spoeddienst brengt extra kosten met zich mee. U rekent direct contant of met de pin af en dient de factuur zelf in bij uw zorgverzekeraar."),
+                   ("Wanneer bel ik de praktijk het beste bij pijn?", "Bel indien mogelijk tussen 08:30 en 10:00 uur. Wij proberen u dan dezelfde dag nog te helpen.")])
 
     # Tarieven
     text_page("homepage/tarieven-en-betaling/", [("", "Home"), ("homepage/tarieven-en-betaling/", "Tarieven en betaling")], "info",
-              "Tarieven en betaling | Tandartspraktijk Badhuisplein Hardenberg",
-              "Tarieven van Tandartspraktijk Badhuisplein volgens de NZa. Betalen via Infomedics, binnen 30 dagen, met mogelijkheid tot betalingsregeling. Begroting op aanvraag.",
+              "Tarieven en betaling | Tandarts Hardenberg | Badhuisplein",
+              "Tarieven van Tandartspraktijk Badhuisplein volgens de NZa. Betalen via Infomedics binnen 30 dagen, betalingsregeling mogelijk. Begroting op aanvraag.",
               'Tarieven en <em class="g">betaling</em>', "Duidelijkheid vooraf: u weet wat een behandeling kost en hoe u betaalt.",
               """
 <h2>Uw tandartsrekening</h2>
@@ -1035,7 +1088,7 @@ def other_pages():
 
     # Verzekering
     text_page("homepage/betalen-en-vergoedingen/", [("", "Home"), ("homepage/betalen-en-vergoedingen/", "Verzekering en vergoedingen")], "info",
-              "Verzekering en vergoedingen tandarts | Badhuisplein Hardenberg",
+              "Verzekering en vergoedingen tandarts | Badhuisplein",
               "Wat vergoedt de basisverzekering bij de tandarts en waar let u op bij een aanvullende tandartsverzekering? Acht tips en uitleg voor volwassenen en kinderen.",
               'Verzekering en <em class="g">vergoedingen</em>', "Wat vergoedt uw zorgverzekering bij de tandarts? Een overzicht, met acht tips voor het kiezen van een aanvullende verzekering.",
               """
@@ -1088,7 +1141,7 @@ def other_pages():
     text_page("cbct-rontgen/", [("", "Home"), ("homepage/praktijkinformatie/", "Praktijk"), ("cbct-rontgen/", "CBCT-scan")], "praktijk",
               "CBCT-scan Hardenberg | 3D-röntgenfoto in de praktijk",
               "Tandartspraktijk Badhuisplein in Hardenberg heeft een eigen Cone Beam CT-scanner: minder straling, korte scantijd en direct een betrouwbaar 3D-beeld.",
-              'CBCT-scan: uw kaak in <em class="g">3D</em>',
+              'CBCT-scan in Hardenberg: uw kaak in <em class="g">3D</em>',
               "Onze praktijk beschikt over een Cone Beam CT-scan. Daarmee maken we een driedimensionaal beeld van de aangezichtsschedel, de holtes in uw hoofd, de onder- en bovenkaak en de kaakkopjes.",
               """
 <h2>Wat zijn de voordelen?</h2>
@@ -1123,8 +1176,8 @@ def other_pages():
     # Kinderen
     text_page("kinderen-en-de-tandarts/", [("", "Home"), ("de-lieve-tandarts/", "Extra aandacht"), ("kinderen-en-de-tandarts/", "Kinderen en de tandarts")], "zorg",
               "Kindertandarts Hardenberg | Kinderen en de tandarts",
-              "Met uw kind naar de tandarts in Hardenberg? Vanaf twee jaar is uw kind welkom bij Tandartspraktijk Badhuisplein. Tips om het eerste bezoek rustig te laten verlopen.",
-              'Kinderen en de <em class="g">tandarts</em>',
+              "Met uw kind naar de tandarts in Hardenberg? Vanaf twee jaar is uw kind welkom bij Badhuisplein. Tips om het eerste bezoek rustig te laten verlopen.",
+              'Met uw kind naar de tandarts in <em class="g">Hardenberg</em>',
               "Tandheelkundige behandeling van kinderen is gebaseerd op vertrouwen. Op speelse wijze maken we uw kind vertrouwd met het tandartsbezoek. Alles is vrijblijvend: lukt het niet, dan een volgende keer beter.",
               """
 <h2>Het eerste bezoek</h2>
@@ -1176,7 +1229,7 @@ def other_pages():
     text_page("bracket-slotjesbeugel/", [("", "Home"), ("behandelingen/othodontie-en-invisalign/", "Orthodontie"), ("bracket-slotjesbeugel/", "Brackets")], "beh",
               "Brackets en slotjesbeugel Hardenberg | Vaste beugel",
               "Een vaste beugel in Hardenberg: brackets zetten tanden en kiezen stuk voor stuk recht. Lees hoe het werkt en vraag een gratis intake aan bij Badhuisplein.",
-              'Brackets: de <em class="g">vaste beugel</em>',
+              'Brackets en slotjesbeugel in <em class="g">Hardenberg</em>',
               "Een vaste beugel, ook wel slotjesbeugel, bracketbeugel of blokjesbeugel genoemd, zet tanden en kiezen afzonderlijk van elkaar recht. Dat is niet alleen mooi, maar ook goed voor uw gezondheid.",
               """
 <h2>Waarom een vaste beugel?</h2>
@@ -1197,7 +1250,7 @@ def other_pages():
     text_page("invisalign/", [("", "Home"), ("behandelingen/othodontie-en-invisalign/", "Orthodontie"), ("invisalign/", "Spark-beugel")], "beh",
               "Spark onzichtbare beugel Hardenberg | Gratis intake",
               "De onzichtbare Spark-beugel in Hardenberg: transparante, uitneembare aligners op maat bij Tandartspraktijk Badhuisplein. Vraag een gratis intake aan.",
-              'Spark: de <em class="g">onzichtbare beugel</em>',
+              'Spark onzichtbare beugel in <em class="g">Hardenberg</em>',
               "Met een Spark-beugel ziet bijna niemand dat u uw tanden recht laat zetten. De behandeling bestaat uit een reeks uitneembare, transparante aligners die speciaal voor uw gebit worden gemaakt.",
               """
 <h2>Zo werkt Spark</h2>
@@ -1334,7 +1387,7 @@ def forms_pages():
     form_page(cur, [("", "Home"), (cur, "Inschrijven")],
               "Inschrijven bij de tandarts in Hardenberg | Nieuwe patiënten",
               "Op zoek naar een tandarts in Hardenberg? Tandartspraktijk Badhuisplein neemt weer nieuwe patiënten aan. Schrijf u en uw gezin online in.",
-              "Inschrijven als nieuwe patiënt",
+              "Inschrijven als nieuwe patiënt in Hardenberg",
               "Wij nemen weer nieuwe patiënten aan. Schrijf uzelf of uw hele gezin in; daarna nodigen we u uit voor een eerste consult.",
               side, form, "Inschrijfformulier", img=None)
 
@@ -1357,7 +1410,7 @@ def forms_pages():
 <div class="fp__alert">{icon("user")}<p><b>Geen tandarts?</b> Gebruik dan het formulier <a href="{{u:inschrijven-als-nieuwe-patient/}}">inschrijven als nieuwe patiënt</a>.</p></div>
 <p class="fp__call">Vragen? Bel <a href="{TEL_HREF}">{TEL}</a>.</p>"""
     form_page(cur, [("", "Home"), ("inschrijven-als-nieuwe-patient/", "Inschrijven"), (cur, "Overschrijven")],
-              "Overschrijven naar Tandartspraktijk Badhuisplein | Hardenberg",
+              "Overschrijven naar Badhuisplein | Tandarts Hardenberg",
               "Wilt u als patiënt worden overgeschreven naar Tandartspraktijk Badhuisplein in Hardenberg? Vul het formulier in, dan nemen wij contact met u op.",
               "Overschrijven naar onze praktijk",
               "Wilt u als patiënt worden overgeschreven naar onze praktijk? Vul onderstaand formulier in.",
@@ -1370,7 +1423,7 @@ def forms_pages():
              field("onderwerp", "Onderwerp", req=False) + field("bericht", "Uw vraag", "textarea", full=True))
     form = form_wrap(cur, "Vraag via website", inner, "Uw e-mailprogramma is geopend met uw vraag. Er is nog niets verstuurd: verstuur de e-mail om af te ronden.", "Vraag versturen")
     crumbs = [("", "Home"), (cur, "Contact")]
-    p = dict(path=cur, title="Contact en openingstijden | Tandarts Hardenberg | Badhuisplein",
+    p = dict(path=cur, title="Contact en openingstijden | Tandarts Hardenberg",
              desc="Contact met Tandartspraktijk Badhuisplein, Badhuisplein 2 en 6, 7772 XC Hardenberg. Bel 0523-216967 of mail info@praktijkbadhuisplein.nl. Tijden en route.",
              h1='Contact en <em class="g">openingstijden</em>', lead="U vindt ons aan het Badhuisplein in Hardenberg. Bel, mail of kom langs, we helpen u graag.",
              crumbs=crumbs)
@@ -1385,6 +1438,8 @@ def forms_pages():
       <p><span class="status" data-status></span></p>
       {hours_table()}
       <p style="color:var(--ink-2);font-size:.95rem;margin-top:14px">We zijn telefonisch bereikbaar op dezelfde tijden. Verplaatsen of afzeggen van afspraken kan alleen telefonisch.</p>
+      <h2 style="font-size:1.7rem;margin-top:32px">Waar vindt u ons?</h2>
+      <p>De praktijk zit aan het Badhuisplein 2 en 6 in Hardenberg. Tandprothetische Praktijk Zieck vindt u in hetzelfde pand op huisnummer 2, ingang B. Woont u in de omgeving, bijvoorbeeld in Gramsbergen, Bergentheim, Slagharen, Dedemsvaart of Ommen? Dan bent u ook van harte welkom. <a href="{ROUTE}" rel="noopener" target="_blank">Plan uw route</a>.</p>
       <div class="alert">{icon("alert")}<div><b>Spoed buiten openingstijden?</b> U kunt terecht bij de Tandartsspoedpraktijk in Zwolle, <a href="tel:09008602">0900-8602</a>. <a href="{{u:homepage/spoedgevallen-en-weekenddienst/}}">Lees meer over spoed</a></div></div>
     </div>
     <div>
@@ -1409,7 +1464,7 @@ def forms_pages():
     form = form_wrap(cur, "Verwijzing CBCT-scan", inner, "Uw e-mailprogramma is geopend met uw verwijzing. Er is nog niets verstuurd: verstuur de e-mail om af te ronden.", "Verwijzing versturen")
     text_page(cur, [("", "Home"), ("cbct-rontgen/", "CBCT-scan"), (cur, "Voor verwijzers")], "info",
               "CBCT-scan doorverwijzen | Voor behandelaars | Badhuisplein",
-              "Verwijs uw patiënt voor een Cone Beam CT-scan naar Tandartspraktijk Badhuisplein in Hardenberg. Wij plannen de afspraak en sturen de scan zo spoedig mogelijk toe.",
+              "Verwijs uw patiënt voor een Cone Beam CT-scan naar Tandartspraktijk Badhuisplein in Hardenberg. Wij plannen de afspraak en sturen u de scan snel toe.",
               'CBCT-scan voor <em class="g">behandelaars</em>',
               "Wilt u voor uw patiënt gebruikmaken van de CBCT-scan in onze praktijk in Hardenberg? Vul het formulier in, dan nemen wij contact op met uw patiënt om een afspraak in te plannen.",
               f"""
@@ -1434,7 +1489,7 @@ def forms_pages():
     form = form_wrap(cur, "Verwijzing narcose", inner, "Uw e-mailprogramma is geopend met uw verwijzing. Er is nog niets verstuurd: verstuur de e-mail om af te ronden.", "Verwijzing versturen")
     text_page(cur, [("", "Home"), ("narcose/", "Narcose"), (cur, "Voor verwijzers")], "info",
               "Narcose doorverwijzen | Voor behandelaars | Badhuisplein",
-              "Wilt u een patiënt doorverwijzen voor een tandheelkundige behandeling onder narcose in Hardenberg? Vul het formulier in, dan nemen wij contact op met uw patiënt.",
+              "Wilt u een patiënt doorverwijzen voor een tandheelkundige behandeling onder narcose in Hardenberg? Vul het formulier in, wij bellen uw patiënt.",
               'Narcose voor <em class="g">behandelaars</em>',
               "Wilt u een patiënt doorverwijzen voor een behandeling onder narcose? Vul het formulier in, dan nemen wij contact op met uw patiënt om een afspraak in te plannen.",
               f"""

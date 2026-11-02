@@ -21,6 +21,8 @@ AddDefaultCharset UTF-8
   RewriteRule ^bereikbaarheid-kerstvakantie/?$ /homepage/spoedgevallen-en-weekenddienst/ [L,R=301]
   RewriteRule ^informatie-met-betrekking-tot-het-coronavirus/?$ /homepage/praktijkinformatie/ [L,R=301]
   RewriteRule ^homepage/?$ /homepage/praktijkinformatie/ [L,R=301]
+  RewriteRule ^(sitemap_index|page-sitemap|element_category-sitemap)\.xml$ /sitemap.xml [L,R=301]
+  RewriteRule ^element_category/ / [L,R=301]
   RewriteRule ^author/ / [L,R=301]
   RewriteRule ^(feed|comments/feed)/?$ / [L,R=301]
   RewriteRule ^(wp-login\.php|xmlrpc\.php|wp-admin|wp-json) - [G,L]
