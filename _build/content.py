@@ -111,7 +111,7 @@ T["implantaten"] = dict(
     desc="Implantaat nodig in Hardenberg? Kroon, brug of klikgebit op implantaten, gepland met onze eigen CBCT-scan en in overleg met de tandprotheticus.",
     h1='Tandimplantaten in <em class="g">Hardenberg</em>',
     lead="Een implantaat is een kunstwortel van titanium die in het kaakbot wordt geplaatst. Daarop komt een kroon, een brug of een prothese. Tandartsen, implantoloog en tandprothetici stemmen de behandeling samen af.",
-    img="team/alvaro.webp", img_alt="Alvaro Soler, tandarts voor implantologie en orthodontie bij Tandartspraktijk Badhuisplein",
+    img="behandeling-alvaro.webp", img_alt="Tandarts Alvaro Soler en een assistente behandelen een patiënte", img_pos="50% 30%",
     procedure="Tandimplantaat",
     who=["alvaro", "kinan", "ana"],
     body="""

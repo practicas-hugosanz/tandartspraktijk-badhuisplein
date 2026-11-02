@@ -199,10 +199,7 @@ def head(p):
     if DEMO:
         robots = "noindex,nofollow"
     preload = ""
-    if p.get("preload") == "assets/img/hero-poster.webp":
-        preload = (f'<link rel="preload" as="image" href="{rel(cur, p["preload"])}" fetchpriority="high" '
-                   f'imagesrcset="{rel(cur, "assets/img/hero-poster-800.webp")} 800w, {rel(cur, p["preload"])} 1600w" imagesizes="100vw">\n')
-    elif p.get("preload"):
+    if p.get("preload"):
         preload = f'<link rel="preload" as="image" href="{rel(cur, p["preload"])}" fetchpriority="high">\n'
     return f"""<!DOCTYPE html>
 <html lang="nl">
@@ -214,7 +211,7 @@ def head(p):
 <meta name="robots" content="{robots}">
 <link rel="canonical" href="{canon}">
 <link rel="alternate" hreflang="nl-NL" href="{canon}">
-<meta name="theme-color" content="#1b2134">
+<meta name="theme-color" content="#a9dcdc">
 <meta name="format-detection" content="telephone=no">
 <meta name="geo.region" content="NL-OV">
 <meta name="geo.placename" content="Hardenberg">
@@ -235,8 +232,7 @@ def head(p):
 <link rel="icon" type="image/png" sizes="192x192" href="{rel(cur, 'assets/img/icon-192.png')}">
 <link rel="apple-touch-icon" href="{rel(cur, 'assets/img/apple-touch-icon.png')}">
 <link rel="manifest" href="{rel(cur, 'site.webmanifest')}">
-<link rel="preload" href="{rel(cur, 'assets/fonts/archivo-latin.woff2')}" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="{rel(cur, 'assets/fonts/worksans-latin.woff2')}" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="{rel(cur, 'assets/fonts/figtree-latin.woff2')}" as="font" type="font/woff2" crossorigin>
 {preload}<link rel="stylesheet" href="{rel(cur, 'assets/css/style.css')}?v={CSS_V}">
 {p.get('schema', '')}
 </head>"""
@@ -271,34 +267,24 @@ def header(p):
 {SPRITE}
 <a class="skip" href="#main">Direct naar de inhoud</a>
 <header class="mast">
-  <div class="wrap mast__top">
-    <div class="mast__visit">
-      <span class="status" data-status role="status">Open maandag tot en met vrijdag</span>
-      <a href="{MAPS}" rel="noopener" target="_blank">Badhuisplein 2 en 6, Hardenberg</a>
-    </div>
-    <a class="mast__logo" href="{rel(cur, '')}" aria-label="{NAME}, naar de homepage"><img src="{rel(cur, 'assets/img/logo-licht.png')}" alt="{NAME}" width="580" height="160"></a>
+  <div class="wrap mast__row">
+    <a class="mast__logo" href="{rel(cur, '')}" aria-label="{NAME}, naar de homepage"><img src="{rel(cur, 'assets/img/logo-donker.png')}" alt="{NAME}" width="580" height="160"></a>
+    <nav class="nav" aria-label="Hoofdmenu">
+      <ul class="nav__list">
+        {dd("beh", "Behandelingen", mega, True, "beh")}
+        {dd("zorg", "Extra aandacht", simple(ZORG), key="zorg")}
+        {dd("praktijk", "Praktijk", simple(PRAKTIJK), key="praktijk")}
+        {dd("info", "Patiënteninfo", simple(INFO), key="info")}
+        <li class="nav__item">{a("inschrijven-als-nieuwe-patient/", "Nieuwe patiënten")}</li>
+        <li class="nav__item">{a("contact/", "Contact")}</li>
+      </ul>
+    </nav>
     <div class="mast__act">
       <a class="mast__tel" href="{TEL_HREF}">{icon("phone")}<span>{TEL}</span></a>
       <a class="btn" href="{rel(cur, 'afspraak-maken/')}">Afspraak maken</a>
     </div>
     <a class="mast__call" href="{TEL_HREF}" aria-label="Bel {TEL}">{icon("phone")}</a>
     <button class="burger" type="button" aria-expanded="false" aria-controls="drawer" aria-label="Menu openen"><span></span></button>
-  </div>
-  <div class="mast__bar">
-    <div class="wrap mast__row">
-      <a class="mast__mark" href="{rel(cur, '')}" tabindex="-1" aria-hidden="true"><img src="{rel(cur, 'assets/img/mark-licht.png')}" alt="" width="124" height="114"></a>
-      <nav class="nav" aria-label="Hoofdmenu">
-        <ul class="nav__list">
-          {dd("beh", "Behandelingen", mega, True, "beh")}
-          {dd("zorg", "Extra aandacht", simple(ZORG), key="zorg")}
-          {dd("praktijk", "Praktijk", simple(PRAKTIJK), key="praktijk")}
-          {dd("info", "Patiënteninfo", simple(INFO), key="info")}
-          <li class="nav__item">{a("inschrijven-als-nieuwe-patient/", "Nieuwe patiënten")}</li>
-          <li class="nav__item">{a("contact/", "Contact")}</li>
-        </ul>
-      </nav>
-      <a class="mast__quick" href="{rel(cur, 'afspraak-maken/')}" tabindex="-1">Afspraak maken</a>
-    </div>
   </div>
 </header>
 <div class="drawer" id="drawer">
@@ -375,6 +361,9 @@ HERO_KIND = {
     "cbct-rontgen/": "poster",
     "kinderen-en-de-tandarts/": "poster",
     "de-lieve-tandarts/": "poster",
+    "invisalign/": "side",
+    "bracket-slotjesbeugel/": "side",
+    "patienten-met-een-beperking/": "side",
     "homepage/spoedgevallen-en-weekenddienst/": "spoed",
     "contact/": "plain",
     "homepage/tarieven-en-betaling/": "plain",
@@ -402,16 +391,16 @@ def page_hero(p, cta=True):
     crumbs = crumbs_html(cur, p["crumbs"])
     btns = ""
     if cta:
-        line = "btn--line" if kind in ("poster", "spoed") else "btn--line btn--ink"
         btns = (f'<div class="btn-row"><a class="btn" href="{rel(cur, "afspraak-maken/")}">{icon("cal")}Afspraak maken</a>'
-                f'<a class="btn {line}" href="{TEL_HREF}">{icon("phone")}Bel {TEL}</a></div>')
+                f'<a class="btn btn--line" href="{TEL_HREF}">{icon("phone")}Bel {TEL}</a></div>')
     h1, lead = p["h1"], p["lead"]
+    pos = f' style="object-position:{p["img_pos"]}"' if p.get("img_pos") else ""
 
-    if kind == "light":
-        pos = f' style="object-position:{p["img_pos"]}"' if p.get("img_pos") else ""
+    if kind in ("light", "side"):
         img = (f'<figure class="ph__img"><img src="{rel(cur, "assets/img/" + p["img"])}" alt="{escape(p.get("img_alt", ""))}" '
-               f'width="480" height="600" fetchpriority="high" decoding="async"{pos}></figure>')
-        return f"""<section class="ph ph--light on-light">
+               f'width="950" height="634" fetchpriority="high" decoding="async"{pos}></figure>')
+        if kind == "side":
+            return f"""<section class="ph ph--side on-light">
   <div class="wrap">
     {crumbs}
     <div class="ph__grid">
@@ -420,11 +409,18 @@ def page_hero(p, cta=True):
     </div>
   </div>
 </section>"""
+        return f"""<section class="ph ph--light on-light">
+  <div class="wrap">
+    {crumbs}
+    <div class="ph__copy"><h1>{h1}</h1><p class="lead">{lead}</p>{btns}</div>
+    {img}
+  </div>
+</section>"""
 
     if kind == "poster":
-        src, alt, pos = POSTER[cur]
-        return f"""<section class="ph ph--poster dark">
-  <div class="ph__bg"><img src="{rel(cur, "assets/img/" + src)}" alt="{escape(alt)}" width="1600" height="900" fetchpriority="high" decoding="async" style="object-position:{pos}"></div>
+        src, alt, imgpos = POSTER[cur]
+        return f"""<section class="ph ph--poster on-light">
+  <div class="ph__bg"><img src="{rel(cur, "assets/img/" + src)}" alt="{escape(alt)}" width="950" height="634" fetchpriority="high" decoding="async" style="object-position:{imgpos}"></div>
   <div class="wrap">
     {crumbs}
     <div class="ph__copy"><h1>{h1}</h1><p class="lead">{lead}</p>{btns}</div>
@@ -455,11 +451,11 @@ def page_hero(p, cta=True):
       <div><p class="lead">{lead}</p>{btns}</div>
     </div>
   </div>
-  <figure class="ph__pano"><img src="{rel(cur, "assets/img/team-panorama.webp")}" alt="Het team van Tandartspraktijk Badhuisplein op de brug in Hardenberg" width="1920" height="350" fetchpriority="high" decoding="async"></figure>
+  <figure class="ph__pano"><img src="{rel(cur, "assets/img/team-panorama.webp")}" alt="Het team van Tandartspraktijk Badhuisplein op een brug in Hardenberg" width="1920" height="350" fetchpriority="high" decoding="async"></figure>
 </section>"""
 
     if kind == "form":
-        return f"""<section class="ph ph--form dark">
+        return f"""<section class="ph ph--form on-light">
   <div class="wrap">
     {crumbs}
     <div class="ph__copy"><h1>{h1}</h1><p class="lead">{lead}</p></div>
@@ -502,7 +498,7 @@ def aside(p, nav=None):
 
 
 def cta_band(cur, title="Klaar voor een gezonde glimlach?", text="Bel ons, plan direct in onze online agenda of schrijf u in als nieuwe patiënt. We nemen weer nieuwe patiënten aan."):
-    return f"""<section class="cta-band dark">
+    return f"""<section class="cta-band on-light">
   <div class="wrap">
     <div><h2>{title}</h2><p>{text}</p></div>
     <div class="btn-row"><a class="btn" href="{rel(cur, 'afspraak-maken/')}">{icon("cal")}Afspraak maken</a><a class="btn btn--line" href="{rel(cur, 'inschrijven-als-nieuwe-patient/')}">{icon("user")}Inschrijven</a></div>
@@ -633,26 +629,6 @@ def form_wrap(cur, subject, inner, ok, button):
 
 # ================================================================= PAGINA'S
 
-def hero_media(cur):
-    """Achtergrondvideo van de hero. Zet de video van de praktijk in assets/video/ als hero.mp4 (en eventueel hero.webm);
-    zolang die er niet is, toont de hero de poster (assets/img/hero-poster.webp)."""
-    vid = ROOT / "assets" / "video"
-    sources = ""
-    if (vid / "hero.webm").exists():
-        sources += f'<source src="{rel(cur, "assets/video/hero.webm")}" type="video/webm">'
-    if (vid / "hero.mp4").exists():
-        sources += f'<source src="{rel(cur, "assets/video/hero.mp4")}" type="video/mp4">'
-    poster = rel(cur, "assets/img/hero-poster.webp")
-    if not sources:
-        return (f'<div class="hx__media" aria-hidden="true"><img src="{poster}" srcset="{rel(cur, "assets/img/hero-poster-800.webp")} 800w, {poster} 1600w" sizes="100vw" alt="" width="1600" height="900" '
-                f'fetchpriority="high" decoding="async"></div>')
-    return (f'<div class="hx__media" aria-hidden="true"><video class="hx__video" autoplay muted loop playsinline '
-            f'preload="metadata" poster="{poster}" data-hero-video>{sources}</video></div>'
-            f'<button class="hx__pause" type="button" aria-pressed="false" data-hero-pause>'
-            f'<svg aria-hidden="true" viewBox="0 0 24 24"><path d="M8 5v14M16 5v14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>'
-            f'<span>Video pauzeren</span></button>')
-
-
 HOME_FAQ = [
     ("Neemt Tandartspraktijk Badhuisplein nieuwe patiënten aan?", 'Ja, wij nemen weer nieuwe patiënten aan. <a href="{u:inschrijven-als-nieuwe-patient/}">Schrijf u online in</a>, dan nodigen we u uit voor een eerste consult. Bent u patiënt bij een andere tandarts, dan kunt u zich ook <a href="{u:overschrijven/}">laten overschrijven</a>.'),
     ("Hoe maak ik een afspraak bij de tandarts in Hardenberg?", 'Plan direct in onze <a href="{u:afspraak-maken/}">online agenda</a> of bel 0523-216967. Verplaatsen of afzeggen kan alleen telefonisch, minstens 48 uur van tevoren.'),
@@ -667,99 +643,118 @@ def home():
     cur = ""
     p = dict(path=cur, title="Tandarts Hardenberg | Tandartspraktijk Badhuisplein",
              desc="Tandarts in Hardenberg met het keurmerk De Lieve Tandarts: controle, implantaten, Invisalign, kronen op één dag en lachgas. Nieuwe patiënten welkom.",
-             preload="assets/img/hero-poster.webp")
+             preload="assets/img/team-panorama.webp")
     p["schema"] = ld(dentist_schema(), {"@type": "WebSite", "@id": BASE + "#website", "url": BASE, "name": NAME, "inLanguage": "nl-NL", "publisher": {"@id": BASE + "#praktijk"}},
                      {"@type": "WebPage", "@id": BASE + "#webpage", "url": BASE, "name": p["title"], "isPartOf": {"@id": BASE + "#website"}, "about": {"@id": BASE + "#praktijk"}, "inLanguage": "nl-NL", "dateModified": TODAY},
                      {"@type": "FAQPage", "@id": BASE + "#home-faq", "mainEntity": [
                          {"@type": "Question", "name": q, "acceptedAnswer": {"@type": "Answer", "text": re.sub(r"<[^>]+>", "", a)}} for q, a in HOME_FAQ]})
-    index = "".join(
-        f'<li><a href="{{u:behandelingen/{s}/}}"><span class="hx__name">{n.replace("Wortelkanaalbehandeling", "Wortelkanaal&shy;behandeling")}</span>{icon("arrow", "hx__arr")}</a></li>'
+    tlist = "".join(
+        f'<li><a href="{{u:behandelingen/{s}/}}">{tico(cur, ic)}<div><h3>{n.replace("Wortelkanaalbehandeling", "Wortelkanaal&shy;behandeling")}</h3><p>{d}</p></div></a></li>'
         for s, n, d, ic in TREATMENTS)
     team = "".join(
-        f'<figure class="person"><img src="{{a:assets/img/team/{k}.webp}}" alt="{escape(n)}, {escape(r.lower())}" width="480" height="720" loading="lazy" decoding="async"><figcaption><b>{n}</b><span>{r}</span></figcaption></figure>'
+        f'<figure class="person"><img src="{{a:assets/img/team/{k}.webp}}" alt="{escape(n)}, {escape(r.lower())}" width="480" height="720" loading="lazy" decoding="async"><figcaption><b>{n}</b></figcaption></figure>'
         for k, (n, r, _) in TEAM.items())
     week = ""
     for d, n, h in HOURS_ROWS:
-        times = "".join(f"<span>{t.replace(' – ', '-')}</span>" for t in h.split(" en ")) if h else '<span class="week__closed">Gesloten</span>'
+        times = "".join(f"<span>{t}</span>" for t in h.split(" en ")) if h else '<span class="week__closed">Gesloten</span>'
         week += f'<li data-day="{d}"{" class=\"is-closed\"" if not h else ""}><b>{n}</b>{times}</li>'
     main = f"""
-<section class="hx dark" aria-labelledby="hero-h">
-  {hero_media(cur)}
-  <div class="wrap">
-    <div class="hx__head">
-      <h1 id="hero-h">Op uw gemak bij de <br>tandarts in <em class="sig">Hardenberg.</em></h1>
-      <div class="hx__side">
-        <p class="lead">Een klantgerichte praktijk met het keurmerk De Lieve Tandarts. Nieuwe patiënten zijn welkom.</p>
-        <div class="btn-row">
-          <a class="btn" href="{{u:afspraak-maken/}}">{icon("cal")}Afspraak maken</a>
-          <a class="btn btn--line" href="{{u:inschrijven-als-nieuwe-patient/}}">{icon("user")}Inschrijven</a>
-        </div>
+<section class="hx" aria-labelledby="hero-h">
+  <div class="wrap hx__copy">
+    <h1 id="hero-h">Op uw gemak bij de tandarts in Hardenberg.</h1>
+    <div class="hx__side">
+      <p class="lead">Een klantgerichte praktijk met het keurmerk De Lieve Tandarts. Nieuwe patiënten zijn welkom.</p>
+      <div class="btn-row">
+        <a class="btn btn--navy" href="{{u:afspraak-maken/}}">{icon("cal")}Afspraak maken</a>
+        <a class="btn btn--line" href="{{u:inschrijven-als-nieuwe-patient/}}">{icon("user")}Inschrijven</a>
       </div>
     </div>
-    <nav class="hx__index" aria-label="Behandelingen">
-      <ul>{index}</ul>
-      <a class="hx__all" href="{{u:behandelingen/}}">Alle behandelingen met uitleg en vergoeding</a>
-    </nav>
+  </div>
+  <figure class="hx__pano"><img src="{{a:assets/img/team-panorama.webp}}" alt="Het team van Tandartspraktijk Badhuisplein in uniform op een brug in Hardenberg" width="1920" height="350" fetchpriority="high" decoding="async"></figure>
+</section>
+<div class="hx__facts">
+  <ul class="wrap">
+    <li><span class="status" data-status role="status">Open maandag tot en met vrijdag</span></li>
+    <li><a href="{TEL_HREF}">{TEL}</a></li>
+    <li><a href="{MAPS}" rel="noopener" target="_blank">Badhuisplein 2 en 6, Hardenberg</a></li>
+    <li><a href="{{u:homepage/spoedgevallen-en-weekenddienst/}}">Pijn of spoed?</a></li>
+  </ul>
+</div>
+
+<section class="lt" aria-labelledby="lieve-h">
+  <div class="lt__copy">
+    <img class="lt__logo" src="{{a:assets/img/lieve-tandarts.png}}" alt="Keurmerk De Lieve Tandarts" width="384" height="112" loading="lazy" decoding="async">
+    <h2 id="lieve-h">Vindt u de tandarts spannend? Daar houden we rekening mee.</h2>
+    <p>Sinds 2018 hebben we het keurmerk De Lieve Tandarts, als eerste praktijk in Overijssel. We plannen zo nodig extra tijd in, leggen uit wat we doen en houden altijd rekening met kinderen.</p>
+    <div class="lt__links">
+      <a class="link" href="{{u:de-lieve-tandarts/}}">Over het keurmerk</a>
+      <a class="link" href="{{u:behandeling-onder-lachgas/}}">Behandeling onder lachgas</a>
+      <a class="link" href="{{u:narcose/}}">Behandeling onder narcose</a>
+    </div>
+  </div>
+  <figure class="lt__pic"><img src="{{a:assets/img/lachgas.webp}}" alt="Een patiënte krijgt lachgas via een neusmasker tijdens de behandeling" width="950" height="634" loading="lazy" decoding="async"></figure>
+</section>
+
+<section class="section" aria-labelledby="beh-h">
+  <div class="wrap">
+    <div class="section__head">
+      <h2 id="beh-h">Waarvoor kunt u bij ons terecht?</h2>
+      <a class="link" href="{{u:behandelingen/}}">Alle behandelingen {icon("arrow")}</a>
+    </div>
+    <ul class="tlist">{tlist}</ul>
   </div>
 </section>
 
-<section class="pk section on-light" aria-labelledby="intro-h">
+<section class="section section--soft" aria-labelledby="intro-h">
   <div class="wrap">
-    <div class="pk__head rv">
+    <div class="pk__head">
       <h2 id="intro-h">Alle zorg voor uw gebit, onder één dak in Hardenberg.</h2>
       <div>
-        <p class="lead">Bij Tandartspraktijk Badhuisplein kunt u terecht voor alle voorkomende tandheelkundige behandelingen, esthetische tandheelkunde, orthodontie en implantologie. Preventie neemt daarbij een centrale plaats in.</p>
         <p>Tandartsen, preventieassistentes, tandprothetici en een tandtechnieker werken hier nauw samen. Een 3D-scan maken we zelf, een normale kroon is meestal dezelfde dag klaar en uw prothese repareren we in ons eigen laboratorium.</p>
-        <p><a class="link" href="{{u:homepage/praktijkinformatie/}}">Meer over de praktijk {icon("arrow")}</a></p>
+        <a class="link" href="{{u:homepage/praktijkinformatie/}}">Meer over de praktijk {icon("arrow")}</a>
       </div>
     </div>
-    <div class="pk__pics rv">
-      <figure class="pk__wide"><img src="{{a:assets/img/gevel.webp}}" alt="De gevel van Tandartspraktijk Badhuisplein in Hardenberg" width="950" height="634" loading="lazy" decoding="async"><figcaption><b>Badhuisplein 2 en 6, in Hardenberg.</b> In huis: een 3D CBCT-scanner en een eigen tandtechnisch laboratorium voor kronen, bruggen en protheses.</figcaption></figure>
-      <figure class="pk__tall"><img src="{{a:assets/img/balie-team.webp}}" alt="Twee medewerkers van de praktijk aan de balie" width="950" height="1424" loading="lazy" decoding="async"><figcaption><b>Aan de balie begint uw bezoek.</b> Vertel het ons gerust als u het spannend vindt, dan houden we daar rekening mee.</figcaption></figure>
+    <div class="pk__pics">
+      <figure class="pk__wide"><img src="{{a:assets/img/gevel.webp}}" alt="De gevel van Tandartspraktijk Badhuisplein in Hardenberg" width="950" height="634" loading="lazy" decoding="async"></figure>
+      <figure class="pk__small"><img src="{{a:assets/img/balie.webp}}" alt="Twee medewerkers aan de balie, met het logo van de praktijk op het glas" width="950" height="634" loading="lazy" decoding="async"></figure>
+      <figure class="pk__small"><img src="{{a:assets/img/cadcam.webp}}" alt="Medewerker bij de machine die kronen op maat maakt" width="950" height="634" loading="lazy" decoding="async"></figure>
     </div>
   </div>
 </section>
 
-<section class="section section--sand on-light" aria-labelledby="zorg-h">
+<section class="section" aria-labelledby="zorg-h">
   <div class="wrap">
-    <div class="section__head rv"><div><h2 id="zorg-h">Extra aandacht voor wie het spannend vindt, en voor kinderen.</h2></div></div>
-    <div class="stories">
-      <a class="story story--a rv" href="{{u:kinderen-en-de-tandarts/}}">
-        <img src="{{a:assets/img/kinderen.webp}}" alt="Preventieassistente met een jong meisje in de behandelstoel" width="950" height="634" loading="lazy" decoding="async">
-        <div class="story__body"><h3>Kinderen en de tandarts</h3><p>Vanaf twee jaar mag uw kind mee om rustig te wennen. Alles is vrijblijvend: lukt het niet, dan een volgende keer beter.</p><span class="link">Tips voor ouders {icon("arrow")}</span></div>
-      </a>
-      <a class="story story--b story--dark story--quote rv rv-d1" href="{{u:de-lieve-tandarts/}}">
-        <div class="story__body"><blockquote>Laat ons weten hoe we u het beste kunnen helpen.</blockquote><p>Sinds 2018 hebben we het keurmerk De Lieve Tandarts, als eerste praktijk in Overijssel. We plannen zo nodig extra tijd in en leggen uit wat we doen. Ook lachgas en narcose zijn mogelijk.</p><span class="link">Over De Lieve Tandarts {icon("arrow")}</span></div>
-      </a>
-      <a class="story story--c rv" href="{{u:cbct-rontgen/}}">
-        <img src="{{a:assets/img/opg.webp}}" alt="Assistente en patiënt bij de Cone Beam CT-scanner in de praktijk" width="950" height="634" loading="lazy" decoding="async">
-        <div class="story__body"><h3>3D CBCT-scan in huis</h3><p>Minder straling dan een normale CT-scan en direct een betrouwbaar 3D-beeld. Ook voor verwijzende behandelaars.</p><span class="link">Over de CBCT-scan {icon("arrow")}</span></div>
-      </a>
-      <a class="story story--d rv rv-d1" href="{{u:behandelingen/othodontie-en-invisalign/}}">
-        <img src="{{a:assets/img/invisalign.webp}}" alt="Doorzichtige aligner wordt op de tanden geplaatst" width="576" height="376" loading="lazy" decoding="async">
-        <div class="story__body"><h3>Invisalign, Spark of brackets</h3><p>Onzichtbare aligners of een vaste beugel: tijdens een gratis intake kijken we wat bij u past.</p><span class="link">Meer over orthodontie {icon("arrow")}</span></div>
-      </a>
+    <div class="section__head"><h2 id="zorg-h">Voor het hele gezin</h2></div>
+    <div class="rows">
+      <article class="row">
+        <figure class="row__pic"><img src="{{a:assets/img/kinderen.webp}}" alt="Preventieassistente met een jong meisje in de behandelstoel" width="950" height="634" loading="lazy" decoding="async"></figure>
+        <div><h3>Kinderen en de tandarts</h3><p>Vanaf twee jaar mag uw kind mee om rustig te wennen. Alles is vrijblijvend: lukt het niet, dan een volgende keer beter.</p><a class="link" href="{{u:kinderen-en-de-tandarts/}}">Tips voor ouders {icon("arrow")}</a></div>
+      </article>
+      <article class="row">
+        <figure class="row__pic"><img src="{{a:assets/img/scan.webp}}" alt="Assistente maakt een digitale scan van het gebit van een patiënte" width="950" height="634" loading="lazy" decoding="async"></figure>
+        <div><h3>Invisalign, Spark of brackets</h3><p>Onzichtbare aligners of een vaste beugel: tijdens een gratis intake kijken we wat bij u past.</p><a class="link" href="{{u:afspraak-maken/}}?soort=intake-orthodontie#formulier">Gratis intake aanvragen {icon("arrow")}</a> <p style="margin-top:12px"><a class="link" href="{{u:behandelingen/othodontie-en-invisalign/}}">Meer over orthodontie</a></p></div>
+      </article>
+      <article class="row">
+        <figure class="row__pic"><img src="{{a:assets/img/opg.webp}}" alt="Assistente en patiënt bij de Cone Beam CT-scanner in de praktijk" width="950" height="634" loading="lazy" decoding="async"></figure>
+        <div><h3>3D CBCT-scan in huis</h3><p>Minder straling dan een normale CT-scan en direct een betrouwbaar 3D-beeld. Ook voor verwijzende behandelaars.</p><a class="link" href="{{u:cbct-rontgen/}}">Over de CBCT-scan {icon("arrow")}</a></div>
+      </article>
     </div>
   </div>
 </section>
 
-<section class="section section--paper on-light" aria-labelledby="team-h">
+<section class="section section--soft" aria-labelledby="team-h">
   <div class="wrap">
-    <div class="section__head rv">
-      <div><h2 id="team-h">Ons team</h2><p>Negentien collega’s die elke dag klaarstaan voor uw mondgezondheid, van de balie tot het laboratorium.</p></div>
-      <div class="team-head__act">
-        <a class="link" href="{{u:homepage/ons-team/}}">Maak kennis met het team {icon("arrow")}</a>
-        <div class="rail-nav"><button type="button" data-rail="-1" aria-controls="team-strip" aria-label="Vorige teamleden"><svg aria-hidden="true"><use href="#i-arrow"/></svg></button><button type="button" data-rail="1" aria-controls="team-strip" aria-label="Volgende teamleden"><svg aria-hidden="true"><use href="#i-arrow"/></svg></button></div>
-      </div>
+    <div class="section__head">
+      <div><h2 id="team-h">Dit zijn wij</h2><p>Negentien collega’s, van de balie tot het laboratorium.</p></div>
+      <a class="link" href="{{u:homepage/ons-team/}}">Maak kennis met het team {icon("arrow")}</a>
     </div>
-    <div class="team-strip" id="team-strip" tabindex="0" aria-label="Teamleden, veeg of scroll horizontaal">{team}</div>
+    <div class="team-wall">{team}</div>
   </div>
 </section>
 
-<section class="np section on-light" aria-labelledby="nieuw-h">
+<section class="section section--sand" aria-labelledby="nieuw-h">
   <div class="wrap np__grid">
-    <figure class="np__pic rv"><img src="{{a:assets/img/wachtkamer.webp}}" alt="Een medewerker van de praktijk begroet een patiënte in de wachtkamer" width="950" height="634" loading="lazy" decoding="async"><figcaption>Welkom in onze wachtkamer aan het Badhuisplein</figcaption></figure>
-    <div class="np__body rv rv-d1">
+    <div class="np__body">
       <h2 id="nieuw-h">Nieuwe patiënten</h2>
       <p class="lead">Wij nemen weer nieuwe patiënten aan.</p>
       <ol class="np__list">
@@ -768,40 +763,40 @@ def home():
         <li><h3>Eerste consult</h3><p>U vertelt wat uw wensen en klachten zijn. We bespreken uw medische vragenlijst, onderzoeken uw mond en maken digitale röntgenfoto’s.</p></li>
       </ol>
       <a class="btn btn--navy" href="{{u:inschrijven-als-nieuwe-patient/}}">{icon("user")}Nu inschrijven</a>
-      <p class="np__proof">{STARS}<span><b>4,5 van 5</b> gemiddeld in 48 Google-reviews</span><a class="link" href="{MAPS}" rel="noopener" target="_blank">Lees de reviews op Google {icon("arrow")}</a></p>
+      <p class="np__proof">{STARS}<span><b>4,5 van 5</b> gemiddeld in 48 Google-reviews</span><a class="link" href="{MAPS}" rel="noopener" target="_blank">Lees de reviews</a></p>
     </div>
+    <figure class="np__pic"><img src="{{a:assets/img/wachtkamer.webp}}" alt="Een medewerker van de praktijk begroet een patiënte in de wachtkamer" width="950" height="634" loading="lazy" decoding="async"></figure>
   </div>
 </section>
 
-<section class="section section--paper on-light" aria-labelledby="vragen-h">
-  <div class="wrap">
-    <div class="faq faq--home rv">
-      <h2 id="vragen-h">Veelgestelde vragen over onze praktijk in Hardenberg</h2>
+<section class="section" aria-labelledby="vragen-h">
+  <div class="wrap qa">
+    <h2 id="vragen-h">Veelgestelde vragen over onze praktijk in Hardenberg</h2>
+    <div class="faq">
       {"".join(f"<details><summary>{q}</summary><div><p>{a}</p></div></details>" for q, a in HOME_FAQ)}
     </div>
   </div>
 </section>
 
-<section class="cl dark" aria-labelledby="contact-h">
+<section class="cl section section--soft" aria-labelledby="contact-h">
   <div class="wrap cl__grid">
     <div class="cl__info">
       <h2 id="contact-h">Contact en openingstijden</h2>
       <p class="lead">U vindt ons aan het Badhuisplein 2 en 6 in Hardenberg.</p>
       {contact_dl(cur)}
-      <p><a class="link" href="{{u:contact/}}">Alle contactgegevens {icon("arrow")}</a></p>
+      <a class="link" href="{{u:contact/}}">Alle contactgegevens {icon("arrow")}</a>
     </div>
     <div class="cl__book">
       <p class="cl__now"><span class="status" data-status></span></p>
       <ol class="week" aria-label="Openingstijden per dag">{week}</ol>
       <div class="cl__intake">
         <h3>Gratis intake orthodontie</h3>
-        <p>Invisalign, Spark of brackets: wat past bij u? Laat het ons weten, dan nemen wij contact met u op voor een gratis intake.</p>
+        <p>Invisalign, Spark of brackets: wat past bij u? Laat het ons weten, dan nemen wij contact met u op.</p>
         <div class="cl__choices">
+          <a class="btn" href="{{u:afspraak-maken/}}">{icon("cal")}Afspraak maken</a>
           <a class="btn btn--line" href="{{u:afspraak-maken/}}?soort=intake-orthodontie#formulier">Gratis intake aanvragen</a>
-          <a class="btn btn--line" href="{{u:behandelingen/othodontie-en-invisalign/}}">Meer over orthodontie</a>
         </div>
       </div>
-      <a class="btn cl__cta" href="{{u:afspraak-maken/}}">{icon("cal")}Afspraak maken</a>
       <p class="cl__spoed">{icon("alert")}<span><b>Pijn of spoed?</b> Bel indien mogelijk tussen 08:30 en 10:00 uur, dan proberen we u dezelfde dag nog te helpen. <a href="{{u:homepage/spoedgevallen-en-weekenddienst/}}">Wat te doen buiten openingstijden</a></span></p>
     </div>
   </div>
@@ -840,9 +835,9 @@ def treatment_pages():
     {aside(p, ("Behandelingen", [("behandelingen/" + x, y) for x, y, *_ in TREATMENTS]))}
   </div>
 </section>
-<section class="section section--sand on-light" style="padding-block:clamp(48px,6vw,80px)">
+<section class="section on-light" style="padding-block:0 clamp(48px,6vw,80px)">
   <div class="wrap">
-    <h2 style="font-size:clamp(1.6rem,2.6vw,2.2rem)">Gerelateerde behandelingen</h2>
+    <h2 style="font-size:clamp(1.5rem,2.4vw,2rem)">Gerelateerde behandelingen</h2>
     <div class="related">{rel_items}</div>
   </div>
 </section>
@@ -1289,7 +1284,7 @@ def other_pages():
 </ul>
 <h3>Reageren</h3>
 <p>Stuur je sollicitatiebrief en cv naar <a href="mailto:{JOBS}?subject=Sollicitatie%20tandartsassistente">{JOBS}</a>. Vragen? Bel <a href="{TEL_HREF}">{TEL}</a>.</p>
-""", img="team/lucette.webp", img_alt="Lucette, praktijkmanager", nav=PRAKTIJK_NAV, cta=False,
+""", img="steri.webp", img_alt="Een assistente aan het werk in de sterilisatieruimte van de praktijk", img_pos="50% 35%", nav=PRAKTIJK_NAV, cta=False,
               extra_schema=[dentist_schema(False), {"@type": "JobPosting", "title": "Tandartsassistente", "description": f"<p>Tandartsassistente, fulltime of parttime, bij Tandartspraktijk Badhuisplein in Hardenberg. Stuur je sollicitatiebrief en cv naar {JOBS}.</p>",
                                                     "datePosted": TODAY, "employmentType": ["FULL_TIME", "PART_TIME"], "hiringOrganization": {"@type": "Organization", "name": NAME, "sameAs": BASE, "logo": BASE + "assets/img/icon-512.png"},
                                                     "jobLocation": {"@type": "Place", "address": POSTAL}}])
@@ -1549,7 +1544,7 @@ def misc():
     (ROOT / "robots.txt").write_text(f"User-agent: *\nAllow: /\nDisallow: /_build/\n\nSitemap: {BASE}sitemap.xml\n", encoding="utf-8")
     (ROOT / "site.webmanifest").write_text(json.dumps({
         "name": NAME, "short_name": "Badhuisplein", "lang": "nl", "start_url": "/", "display": "standalone",
-        "background_color": "#1b2134", "theme_color": "#1b2134",
+        "background_color": "#a9dcdc", "theme_color": "#a9dcdc",
         "icons": [{"src": "assets/img/icon-192.png", "sizes": "192x192", "type": "image/png"}, {"src": "assets/img/icon-512.png", "sizes": "512x512", "type": "image/png"}]},
         ensure_ascii=False, indent=2), encoding="utf-8")
 

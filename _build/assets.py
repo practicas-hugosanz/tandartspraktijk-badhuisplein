@@ -10,8 +10,8 @@ from PIL import Image, ImageDraw, ImageFont, ImageOps
 SRC = Path(sys.argv[1])
 ROOT = Path(__file__).resolve().parent.parent
 IMG = ROOT / "assets" / "img"
-NAVY = (27, 33, 52)
-GOLD = (200, 185, 146)
+NAVY = (22, 38, 74)
+GOLD = (169, 220, 220)
 
 
 def webp(src, dst, width, quality=78):
@@ -48,11 +48,6 @@ webp("brackets.png", IMG / "brackets.webp", 587)
 webp("TP-Badhuisplein-494.jpg", IMG / "team-panorama.webp", 1920, 80)
 Image.open(SRC / "logo-lieve-tandarts-768x224-2.png").convert("RGBA").resize((384, 112), Image.LANCZOS).save(IMG / "lieve-tandarts.png", optimize=True)
 
-# Poster van de hero (getoond zolang er geen video is, en als stilstaand beeld bij de video)
-balie = Image.open(SRC / "Balie-099.jpg").convert("RGB")
-balie = ImageOps.fit(balie, (1600, 900), Image.LANCZOS, centering=(0.5, 0.5))
-balie.save(IMG / "hero-poster.webp", "WEBP", quality=74, method=6)
-balie.resize((800, 450), Image.LANCZOS).save(IMG / "hero-poster-800.webp", "WEBP", quality=72, method=6)
 
 # Behandeliconen: witte lijniconen -> alfamasker (kleur via CSS mask)
 (IMG / "icons").mkdir(parents=True, exist_ok=True)
@@ -75,11 +70,9 @@ for y in range(logo.height):
         dp[x, y] = (*NAVY, a) if r > 235 and g > 235 and b > 235 else (150, 128, 78, a)
 dark.save(IMG / "logo-donker.png", optimize=True)
 
-# Beeldmerk (de tand) uitsnijden voor favicons en de kleine kop
+# Beeldmerk (de tand) uitsnijden voor favicons
 mark = logo.crop((0, 0, 140, logo.height))
 mark = mark.crop(mark.getchannel("A").getbbox())
-mark.save(IMG / "mark-licht.png", optimize=True)
-print("mark", mark.size)
 
 
 def icon(size, pad=0.2, radius=0.22):
@@ -113,8 +106,8 @@ og.paste(Image.new("RGB", (160, 630), NAVY), (770, 0), grad)
 lg = logo.copy()
 lg.thumbnail((360, 100), Image.LANCZOS)
 og.paste(lg, (80, 70), lg)
-head = ImageFont.truetype(str(ROOT / "_build" / "Archivo.ttf"), 58)
-head.set_variation_by_axes([700])
+head = ImageFont.truetype(str(ROOT / "_build" / "Figtree.ttf"), 58)
+head.set_variation_by_axes([800])
 sans = ImageFont.truetype("arial.ttf", 28)
 d.text((80, 230), "Op uw gemak bij de", font=head, fill=(255, 255, 255))
 d.text((80, 302), "tandarts in Hardenberg.", font=head, fill=GOLD)

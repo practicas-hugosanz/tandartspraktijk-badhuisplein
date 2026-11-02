@@ -50,74 +50,13 @@
   var today = nowNL().day;
   document.querySelectorAll("[data-day='" + today + "']").forEach(function (el) { el.classList.add("is-today"); });
 
-  /* ---------- Masthead: bovenste rij scrolt weg, de navigatiebalk blijft staan ---------- */
-  var mast = document.querySelector(".mast");
-  var mastTop = mast && mast.querySelector(".mast__top");
+  /* ---------- Actiebalk op mobiel ---------- */
   var mbar = document.querySelector(".mbar");
-  var wasStuck = null;
   function onScroll() {
-    var y = window.scrollY;
-    if (mast && mastTop) {
-      var stuck = y > mastTop.offsetHeight && getComputedStyle(mast.querySelector(".mast__bar")).display !== "none";
-      if (stuck !== wasStuck) {
-        mast.classList.toggle("is-stuck", stuck);
-        // de verkorte link is alleen bereikbaar als hij zichtbaar is
-        mast.querySelector(".mast__quick").tabIndex = stuck ? 0 : -1;
-        wasStuck = stuck;
-      }
-    }
-    if (mbar) mbar.classList.toggle("is-on", y > 420 && !doc.classList.contains("menu-open"));
+    if (mbar) mbar.classList.toggle("is-on", window.scrollY > 420 && !doc.classList.contains("menu-open"));
   }
   window.addEventListener("scroll", onScroll, { passive: true });
   onScroll();
-
-  /* ---------- Achtergrondvideo in de hero ---------- */
-  var video = document.querySelector("[data-hero-video]");
-  var pauseBtn = document.querySelector("[data-hero-pause]");
-  if (video && pauseBtn) {
-    var userPaused = reduce;
-    var label = pauseBtn.querySelector("span");
-    var setState = function () {
-      pauseBtn.setAttribute("aria-pressed", String(userPaused));
-      label.textContent = userPaused ? "Video afspelen" : "Video pauzeren";
-      pauseBtn.querySelector("path").setAttribute("d", userPaused ? "M8 5l11 7-11 7z" : "M8 5v14M16 5v14");
-    };
-    if (reduce) video.pause();
-    setState();
-    pauseBtn.addEventListener("click", function () {
-      userPaused = !userPaused;
-      if (userPaused) video.pause(); else video.play().catch(function () {});
-      setState();
-    });
-    // buiten beeld stilzetten, scheelt batterij
-    if ("IntersectionObserver" in window) {
-      new IntersectionObserver(function (en) {
-        if (userPaused) return;
-        if (en[0].isIntersecting) video.play().catch(function () {}); else video.pause();
-      }).observe(video);
-    }
-  }
-
-  /* ---------- Teamstrook: pijlknoppen naast het vegen ---------- */
-  document.querySelectorAll("[data-rail]").forEach(function (btn) {
-    var strip = document.getElementById(btn.getAttribute("aria-controls"));
-    if (!strip) return;
-    btn.addEventListener("click", function () {
-      strip.scrollBy({ left: +btn.getAttribute("data-rail") * strip.clientWidth * 0.8, behavior: reduce ? "auto" : "smooth" });
-    });
-  });
-  document.querySelectorAll(".team-strip").forEach(function (strip) {
-    var prev = document.querySelector('[data-rail="-1"][aria-controls="' + strip.id + '"]');
-    var next = document.querySelector('[data-rail="1"][aria-controls="' + strip.id + '"]');
-    if (!prev || !next) return;
-    var update = function () {
-      prev.disabled = strip.scrollLeft <= 4;
-      next.disabled = strip.scrollLeft + strip.clientWidth >= strip.scrollWidth - 4;
-    };
-    strip.addEventListener("scroll", update, { passive: true });
-    window.addEventListener("resize", update);
-    update();
-  });
 
   /* ---------- Desktop dropdowns ---------- */
   var items = document.querySelectorAll(".nav__item.has-drop");
@@ -174,32 +113,7 @@
   if (burger) {
     if (drawer) drawer.inert = true;
     burger.addEventListener("click", function () { toggleMenu(); });
-    window.addEventListener("resize", function () { if (window.innerWidth > 1024) toggleMenu(false); });
-  }
-
-  /* ---------- Reveal bij scrollen ---------- */
-  // Alleen elementen onder de vouw verbergen; zichtbaar maken zodra ze in beeld scrollen
-  if (!reduce) {
-    var pending = [].slice.call(document.querySelectorAll(".rv")).filter(function (el) {
-      return el.getBoundingClientRect().top > window.innerHeight;
-    });
-    if (pending.length) {
-      var ticking = false;
-      var reveal = function () {
-        ticking = false;
-        var h = window.innerHeight * 0.92;
-        pending = pending.filter(function (el) {
-          if (el.getBoundingClientRect().top < h) { el.classList.add("in"); return false; }
-          return true;
-        });
-        if (!pending.length) window.removeEventListener("scroll", onReveal);
-      };
-      var onReveal = function () { if (!ticking) { ticking = true; setTimeout(reveal, 50); } };
-      document.querySelectorAll(".rv").forEach(function (el) { if (pending.indexOf(el) < 0) el.classList.add("in"); });
-      window.addEventListener("scroll", onReveal, { passive: true });
-      window.addEventListener("resize", onReveal);
-      setTimeout(reveal, 60);
-    }
+    window.addEventListener("resize", function () { if (window.innerWidth > 1260) toggleMenu(false); });
   }
 
   /* ---------- Kaart pas laden na klik (privacy: geen Google-cookies vooraf) ---------- */
